@@ -54,3 +54,4 @@ Here the index is mapped to a `uint4` stored within the `uint256`. To store an i
 ## How optimal is the packing
 Ultimately this is dependant on the size and number of indices being packed. Smaller indices mean more can be packed into a single `uint256`, the more indices being packed the greater the overall affect.
 
+TODO: compare the gas fee between the optimised and unoptimised contracts.
