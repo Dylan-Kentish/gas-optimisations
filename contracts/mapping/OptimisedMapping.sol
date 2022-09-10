@@ -2,6 +2,9 @@
 pragma solidity ^0.8.9;
 
 contract OptimisedMapping {
+    // It is cheaper to calculate these values in the getValue func, however, 
+    // leaving here for simplicity. 
+    
     // This refers to a packedIndex
     // Changing the number of bits affect the number of indices per index (uint256)
     // It is wise to keep this as a factor of 256, altough not strictly necessary.
