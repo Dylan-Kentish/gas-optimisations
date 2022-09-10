@@ -1,8 +1,8 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
-const { BigNumber } = require("ethers");
+const { expect } = require('chai');
+const { ethers } = require('hardhat');
+const { BigNumber } = require('ethers');
 
-describe("Mapping", function () {
+describe('Mapping', function () {
   async function deploy() {
     // ids
     const ids = new Array(10000).fill().map((_, i) => i);
@@ -34,18 +34,18 @@ describe("Mapping", function () {
       packedIndices.push(BigNumber.from(bytes.reverse()));
     }
 
-    const UnOptimisedMapping = await ethers.getContractFactory("UnOptimisedMapping");
+    const UnOptimisedMapping = await ethers.getContractFactory('UnOptimisedMapping');
     const unoptimisedMapping = await UnOptimisedMapping.deploy(indices, values);
     await unoptimisedMapping.deployed();
 
-    const OptimisedMapping = await ethers.getContractFactory("OptimisedMapping");
+    const OptimisedMapping = await ethers.getContractFactory('OptimisedMapping');
     const optimisedMapping = await OptimisedMapping.deploy(packedIndices, values);
     await optimisedMapping.deployed();
 
     return { unoptimisedMapping, optimisedMapping, ids, indices };
   }
 
-  describe("getValue", () => {
+  describe('getValue', () => {
     let unoptimisedMapping;
     let optimisedMapping;
     let ids;
@@ -55,7 +55,7 @@ describe("Mapping", function () {
       ({ unoptimisedMapping, optimisedMapping, ids, indices } = await deploy())
     })
 
-    it("optimisedMapping should get the correct values", async () => {
+    it('optimisedMapping should get the correct values', async () => {
       for (let i = 0; i < ids.length; i++) {
         const id = ids[i];
         const a = await optimisedMapping.getValue(id)
@@ -64,7 +64,7 @@ describe("Mapping", function () {
       }
     });
 
-    it("unoptimisedMapping should get the correct values", async () => {
+    it('unoptimisedMapping should get the correct values', async () => {
       for (let i = 0; i < ids.length; i++) {
         const id = ids[i];
         const a = await unoptimisedMapping.getValue(id)
