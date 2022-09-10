@@ -30,7 +30,7 @@ contract OptimisedMapping {
         unchecked {
             uint256 valueIndex = getValueIndex(id);
 
-            uint256 bitLength = 16;
+            uint256 bitLength = 10;
             uint256 indicesPerIndex = 256 / bitLength;
             uint256 bitMask = (1 << bitLength) - 1;
 

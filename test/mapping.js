@@ -10,19 +10,32 @@ describe('Mapping', function () {
     const ids = new Array(10000).fill().map((_, i) => i);
 
     // values
-    const maxUint16 = (1 << 16) - 1
-    const values = new Array(10).fill().map(() => Math.floor(Math.random() * maxUint16));
+    const maxUint10 = (1 << 10) - 1
+    const values = new Array(10).fill().map(() => Math.floor(Math.random() * maxUint10));
 
     // packed values
-    const valueIndicesPerIndex = 256 / 16;
-    const packedValues= [];
+    const valueIndicesPerIndex = Math.floor(256 / 10);
+    const packedValues = [];
     // loop through all values, packing into a uint256
     for (let i = 0; i < values.length; i += valueIndicesPerIndex) {
       let bytes = [];
-      for (let j = i; j < i + valueIndicesPerIndex && j < values.length; j++) {
-        // a byte is uint8, so pack uint16 into two uint8.
-        bytes.push(values[j] & 0xFF);
-        bytes.push((values[j] & 0xFF00) >> 8);
+
+      for (let j = i; j < i + valueIndicesPerIndex && j < values.length; j += 4) {
+        // a byte is uint8, so pack four uint10 into five uint8.
+        const toPack = Math.min(values.length - j, 4)
+
+        // since the resulting value is a uint40 and JS bitwise operators use 
+        // uint32 we must use BigNumber for the bitwise operations.
+        let value = BigNumber.from(0)
+        for (let k = 0; k < toPack; k++) {
+          value = value.add(BigNumber.from(values[j + k]).shl(10 * k))
+        }
+
+        const bytesCount = Math.ceil((toPack * 10) / 8);
+        for (let k = 0; k < bytesCount; k++) {
+          const shift = 8 * k
+          bytes.push(BigNumber.from(0xFF).shl(shift).and(BigNumber.from(value)).shr(shift).toNumber());
+        }
       }
 
       // create a uint256 from bytes
