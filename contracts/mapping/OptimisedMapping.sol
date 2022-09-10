@@ -2,20 +2,11 @@
 pragma solidity ^0.8.9;
 
 contract OptimisedMapping {
-    // It is cheaper to calculate these values in the getValue func, however, 
-    // leaving here for simplicity. 
-    
-    // This refers to a packedIndex
-    // Changing the number of bits affect the number of indices per index (uint256)
-    // It is wise to keep this as a factor of 256, altough not strictly necessary.
-    uint256 constant bitLength = 4;
-    uint256 constant indicesPerIndex = 256 / bitLength;
-    uint256 constant bitMask = (1 << bitLength) - 1;
-
     mapping(uint256 => uint256) public packedIndices;
-    mapping(uint256 => uint256) public values;
+    mapping(uint256 => uint256) public packedValues;
 
-    constructor(uint256[] memory _packedIndices, uint256[] memory _values) {
+    constructor(uint256[] memory _packedIndices, uint256[] memory _packedValues)
+    {
         uint256 indicesLength = _packedIndices.length;
         for (uint256 i = 0; i < indicesLength; ) {
             packedIndices[i] = _packedIndices[i];
@@ -25,9 +16,9 @@ contract OptimisedMapping {
             }
         }
 
-        uint256 valuesLength = _values.length;
+        uint256 valuesLength = _packedValues.length;
         for (uint256 i = 0; i < valuesLength; ) {
-            values[i] = _values[i];
+            packedValues[i] = _packedValues[i];
 
             unchecked {
                 ++i;
@@ -37,12 +28,37 @@ contract OptimisedMapping {
 
     function getValue(uint256 id) external view returns (uint256 value) {
         unchecked {
+            uint256 valueIndex = getValueIndex(id);
+
+            uint256 bitLength = 16;
+            uint256 indicesPerIndex = 256 / bitLength;
+            uint256 bitMask = (1 << bitLength) - 1;
+
+            uint256 index = valueIndex / indicesPerIndex;
+            uint256 subIndex = valueIndex % indicesPerIndex;
+            uint256 shift = bitLength * subIndex;
+            uint256 subIndexMask = bitMask << shift;
+
+            return (packedValues[index] & subIndexMask) >> shift;
+        }
+    }
+
+    function getValueIndex(uint256 id)
+        internal
+        view
+        returns (uint256 valueIndex)
+    {
+        unchecked {
+            uint256 bitLength = 4;
+            uint256 indicesPerIndex = 256 / bitLength;
+            uint256 bitMask = (1 << bitLength) - 1;
+
             uint256 index = id / indicesPerIndex;
             uint256 subIndex = id % indicesPerIndex;
             uint256 shift = bitLength * subIndex;
             uint256 subIndexMask = bitMask << shift;
 
-            return values[(packedIndices[index] & subIndexMask) >> shift];
+            return (packedIndices[index] & subIndexMask) >> shift;
         }
     }
 }
