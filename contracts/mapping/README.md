@@ -1,6 +1,11 @@
 # Optimising mapping storage
 
-Maps always store values as uint256. Therefore storing a mapping of `uint8 => uint256` is no more optimal than `uint256 => uint256` infact due to casting its actually less optimal.
+> You can think of mappings as hash tables, which are virtually initialised such that every possible key exists and is mapped to a value whose byte-representation is all zeros, a type’s default value. The similarity ends there, the key data is not stored in a mapping, only its keccak256 hash is used to look up the value.
+
+Extract from: *https://docs.soliditylang.org/en/latest/types.html?highlight=mapping#mapping-types*
+
+Due to the nature of the keccak256 hash, storing a mapping of `uint8 => uint256` is no more optimal than `uint256 => uint256`, beacuse the same amount of storage is used to store the keccak256 hash. Therefore, it is more optimal to maximise the number of bits used in the key.
+
 
 ## Context
 This problem is common amongst NFT rarity. Lets assume:
